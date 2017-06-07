@@ -26,7 +26,7 @@ class MyBandsViewController: UIViewController, DismissalDelegate, UINavigationCo
     
     @IBOutlet weak var createNewONBButton: UIButton!
     @IBAction func createNewONBPressed(_ sender: Any) {
-        self.bandTypeView.isHidden = true
+        self.bandTypeView.isHidden = false
         let popOverVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "CreateOneNightBandViewController") as! CreateOneNightBandViewController
         self.addChildViewController(popOverVC)
         popOverVC.view.frame = self.view.frame
@@ -40,7 +40,7 @@ class MyBandsViewController: UIViewController, DismissalDelegate, UINavigationCo
         
     }
     @IBAction func createNewBandPressed(_ sender: Any) {
-        self.bandTypeView.isHidden = true
+        self.bandTypeView.isHidden = false
         let popOverVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "CreateBandViewController") as! CreateBandViewController
         self.addChildViewController(popOverVC)
         popOverVC.destination = self.destination

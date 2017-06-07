@@ -83,7 +83,9 @@ class MP3PlayerViewController: UIViewController, UITableViewDelegate, UITableVie
         if segue.identifier == "MP3ToBand"{
             if let vc = segue.destination as? SessionMakerViewController
             {
+                
                 vc.sessionID = self.BandID
+                vc.sender = self.sender
                 
             }
         }
@@ -433,6 +435,9 @@ class MP3PlayerViewController: UIViewController, UITableViewDelegate, UITableVie
         });
     }
 
+    @IBAction func backPressed(_ sender: Any) {
+        performSegue(withIdentifier: "MP3ToBand", sender: self)
+    }
     
     @IBOutlet weak var closeMP3Button: UIButton!
     @IBAction func closeMP3Touched(_ sender: Any) {

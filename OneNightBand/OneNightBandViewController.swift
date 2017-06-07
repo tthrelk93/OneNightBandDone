@@ -49,6 +49,7 @@ class OneNightBandViewController: UIViewController, UINavigationControllerDelega
     @IBAction func findArtistsPressed(_ sender: Any) {
         performSegue(withIdentifier: "ONBToArtistFinder", sender: self)
     }
+    @IBOutlet weak var backButton: UIButton!
     var artistDict = [String: Any]()
     var picArray = [UIImage]()
     let ref = Database.database().reference()
@@ -59,14 +60,14 @@ class OneNightBandViewController: UIViewController, UINavigationControllerDelega
          navigationController?.navigationBar.backgroundColor = UIColor.black.withAlphaComponent(0.6)
         print(sender)
         if sender == "feed" || sender == "bandBoard"{
-            print("in if")
+            backButton.isHidden = false
             addMediaButton.isHidden = true
             chatButton.isHidden = true
             becomeFanButton.isHidden = false
             
             
         } else {
-            print("else")
+            
             addMediaButton.isHidden = false
             chatButton.isHidden = false
             becomeFanButton.isHidden = true
@@ -174,6 +175,17 @@ class OneNightBandViewController: UIViewController, UINavigationControllerDelega
     var sizingCell = PictureCollectionViewCell()
     var currentButton = String()
     
+    @IBAction func backButtonPressed(_ sender: Any) {
+        if self.sender == "bandBoard"{
+            performSegue(withIdentifier: "ONBToBandBoard", sender: self)
+        }
+        if self.sender == "feed"{
+            performSegue(withIdentifier: "ONBToFeed", sender: self)
+        }
+        if self.sender == "profile"{
+            performSegue(withIdentifier: "ONBToProf", sender: self)
+        }
+    }
     //var vidCellBool: Bool?
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
         //print((self.thisSession.sessionArtists?.count)!)
@@ -491,6 +503,11 @@ class OneNightBandViewController: UIViewController, UINavigationControllerDelega
 
     var thisONB = ONB()
     override func prepare(for segue: UIStoryboardSegue, sender _: Any?) {
+        if segue.identifier == "ONBToBandBoard"{
+            if let vc = segue.destination as? BandBoardViewController{
+                vc.searchType = "OneNightBands"
+            }
+        }
         if segue.identifier == "ONBToArtistFinder"{
             if let vc = segue.destination as? ArtistFinderViewController
             {

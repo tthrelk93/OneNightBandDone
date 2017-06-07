@@ -13,6 +13,19 @@ import FirebaseAuth
 
 class ProfileFindMusiciansViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UINavigationControllerDelegate {
     
+   // @IBAction func cancelButtonPressed(_ sender: Any) {
+    //}
+    @IBOutlet weak var backButton: UIButton!
+    @IBAction func backButtonPressed(_ sender: Any) {
+        backButton.isHidden = true
+        createNewButton.isHidden = false
+        useExistingLabel.isHidden = false
+        createNewLabel.isHidden = false
+        useExistingBandButton.isHidden = false
+        orLabel.isHidden = false
+        collectViewHolder.isHidden = true
+        infoHolder.backgroundColor = UIColor.white.withAlphaComponent(0.63)
+    }
     @IBOutlet weak var orLabel: UILabel!
     @IBOutlet weak var createNewButton: UIButton!
     @IBOutlet weak var useExistingBandButton: UIButton!
@@ -25,12 +38,18 @@ class ProfileFindMusiciansViewController: UIViewController, UICollectionViewDele
     @IBOutlet weak var collectViewHolder: UIView!
     @IBOutlet weak var bandsCollect: UICollectionView!
 
+    @IBOutlet weak var useExistingLabel: UILabel!
     @IBAction func useExistingBandPressed(_ sender: Any) {
+        infoHolder.backgroundColor = UIColor.clear
+        backButton.isHidden = false
         createNewButton.isHidden = true
+        useExistingLabel.isHidden = true
+        createNewLabel.isHidden = true
         useExistingBandButton.isHidden = true
         orLabel.isHidden = true
         collectViewHolder.isHidden = false
     }
+    @IBOutlet weak var createNewLabel: UILabel!
     @IBAction func createNewBandOrOnb(_ sender: Any) {
         
         //performSegue(withIdentifier: "PFMToMyBandsVC", sender: self)
@@ -45,6 +64,7 @@ class ProfileFindMusiciansViewController: UIViewController, UICollectionViewDele
     override func viewDidLoad() {
         super.viewDidLoad()
         loadCollectionViews()
+        backButton.isHidden = true
         createNewButton.isHidden = false
         useExistingBandButton.isHidden = false
         orLabel.isHidden = false
@@ -256,37 +276,74 @@ class ProfileFindMusiciansViewController: UIViewController, UICollectionViewDele
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if(collectionView == self.bandsCollect){
             tempIndex = indexPath.row
-            self.wantedAd.bandType = "band"
-            self.wantedAd.bandID = bandArray[indexPath.row].bandID!
-            self.wantedAd.bandName = bandArray[indexPath.row].bandName!
-            self.wantedAd.city = self.locationText
-            self.wantedAd.date = self.date
-            self.wantedAd.experience = self.expText
-            self.wantedAd.instrumentNeeded = [self.instrumentNeeded]
-            self.wantedAd.moreInfo = self.moreInfoText
-            self.wantedAd.responses = [String:Any]()
-            self.wantedAd.senderID = self.currentUser!
-            self.wantedAd.wantedImage = bandArray[indexPath.row].bandPictureURL.first!
+            
             self.selectedBandID = bandArray[indexPath.row].bandID!
             
-            //upload info to database after asking if sure
-            //performSegue(withIdentifier: "PFMToBand", sender: self)
+            
+            let wantedReference = ref.child("wantedAds").childByAutoId()
+            let wantedReferenceAnyObject = wantedReference.key
+            var values2 = [String:Any]()
+            values2["bandType"] = "band"
+            values2["bandID"] = bandArray[indexPath.row].bandID!
+            values2["bandName"] = bandArray[indexPath.row].bandName!
+            values2["city"] = self.locationText
+            values2["date"] = self.date
+            
+            values2["experience"] = self.expText
+            values2["instrumentNeeded"] = [self.instrumentNeeded]
+            values2["moreInfo"] = self.moreInfoText
+            
+            values2["responses"] = [String:Any]()
+            
+            values2["senderID"] = self.currentUser!
+            values2["wantedImage"] = bandArray[indexPath.row].bandPictureURL.first!
+            values2["wantedID"] = wantedReferenceAnyObject
+            
+            wantedReference.updateChildValues(values2, withCompletionBlock: {(err, ref) in
+                if err != nil {
+                    print(err as Any)
+                    return
+                }
+                
+            })
+            performSegue(withIdentifier: "PFMToProfile", sender: self)
+
+            
+            
         } else{
             tempIndex = indexPath.row
-            self.wantedAd.bandType = "onb"
-            self.wantedAd.bandID = onbArray[indexPath.row].onbID
-            self.wantedAd.bandName = onbArray[indexPath.row].onbName
-            tempIndex = indexPath.row
-            
-            self.wantedAd.city = self.locationText
-            self.wantedAd.date = self.date
-            self.wantedAd.experience = self.expText
-            self.wantedAd.instrumentNeeded = [self.instrumentNeeded]
-            self.wantedAd.moreInfo = self.moreInfoText
-            self.wantedAd.responses = [String:Any]()
-            self.wantedAd.senderID = self.currentUser!
-            self.wantedAd.wantedImage = onbArray[indexPath.row].onbPictureURL.first!
+           
             self.selectedBandID = onbArray[indexPath.row].onbID
+            
+            let wantedReference = ref.child("wantedAds").childByAutoId()
+            let wantedReferenceAnyObject = wantedReference.key
+            var values2 = [String:Any]()
+            values2["bandType"] = "onb"
+            values2["bandID"] = onbArray[indexPath.row].onbID
+            values2["bandName"] = onbArray[indexPath.row].onbName
+            values2["city"] = self.locationText
+            values2["date"] = self.date
+            
+            values2["experience"] = self.expText
+            values2["instrumentNeeded"] = [self.instrumentNeeded]
+            values2["moreInfo"] = self.moreInfoText
+            
+            values2["responses"] = [String:Any]()
+            
+            values2["senderID"] = self.currentUser!
+            values2["wantedImage"] = onbArray[indexPath.row].onbPictureURL.first!
+            values2["wantedID"] = wantedReferenceAnyObject
+            
+            wantedReference.updateChildValues(values2, withCompletionBlock: {(err, ref) in
+                if err != nil {
+                    print(err as Any)
+                    return
+                }
+               
+            })
+            performSegue(withIdentifier: "PFMToProfile", sender: self)
+            
+
             
             
             //upload info to database after asking if sure
@@ -299,6 +356,7 @@ class ProfileFindMusiciansViewController: UIViewController, UICollectionViewDele
     }
     
 
+    @IBOutlet weak var infoHolder: UIView!
 
 
     override func didReceiveMemoryWarning() {
@@ -346,6 +404,12 @@ class ProfileFindMusiciansViewController: UIViewController, UICollectionViewDele
                 
                 
                 }
+        }
+        if segue.identifier == "PFMToProfile"{
+            if let vc = segue.destination as? profileRedesignViewController{
+                vc.sender = "wantedAdCreated"
+            }
+            
         }
         if segue.identifier == "PFMToBand"{
             if let vc = segue.destination as? SessionMakerViewController{

@@ -107,9 +107,9 @@ class SendAuditionViewController: UIViewController, UITextViewDelegate, Dismissa
     }
     
     func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.textColor == UIColor.lightGray {
+        if textView.textColor == UIColor.black {
             textView.text = nil
-            textView.textColor = UIColor.orange
+            textView.textColor = ONBPink
         }
     }
     func textViewDidEndEditing(_ textView: UITextView) {
@@ -119,10 +119,10 @@ class SendAuditionViewController: UIViewController, UITextViewDelegate, Dismissa
             } else {
                 textView.text = "Tap here to give some background on your playing style. (favorite songs, musicial influences, past playing experience, etc...)"
             }
-            textView.textColor = UIColor.lightGray
+            textView.textColor = UIColor.black
         }
     }
-    
+     let ONBPink = UIColor(colorLiteralRed: 201.0/255.0, green: 38.0/255.0, blue: 92.0/255.0, alpha: 1.0)
     
     func showAnimate()
     {

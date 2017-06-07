@@ -53,6 +53,17 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
         
     }
     
+    @IBAction func backPressed(_ sender: Any) {
+        if self.sender == "bandBoard"{
+            performSegue(withIdentifier: "BandToBandBoard", sender: self)
+        }
+        else if self.sender == "feed"{
+            performSegue(withIdentifier: "BandToFeed", sender: self)
+        } else {
+            performSegue(withIdentifier: "TabBarBandToProfile", sender: self)
+        }
+        
+    }
     
     @IBOutlet weak var addNewSession: UIButton!
     @IBOutlet weak var sessionImageView: UIImageView!
@@ -73,6 +84,12 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
     var tableViewCellTouched = String()
     @IBOutlet weak var uploadSessionToFeed: UIButton!
     override func prepare(for segue: UIStoryboardSegue, sender _: Any?) {
+        if segue.identifier == "BandToBandBoard"{
+            if let vc = segue.destination as? BandBoardViewController{
+                vc.searchType = "Bands"
+            }
+        }
+        
         if segue.identifier == "SessionToArtistFinder"{
             if let vc = segue.destination as? ArtistFinderViewController
             {
@@ -97,7 +114,7 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
         }
         if segue.identifier == "BandToArtistProfile"{
             if let vc = segue.destination as? profileRedesignViewController{
-                vc.sender = "band"
+                vc.sender = self.sender
                 vc.senderID = self.sessionID!
                 vc.artistID = self.cellTouchedArtistUID
             }
@@ -110,10 +127,12 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                 vc.sessionID = self.selectedCell?.sessionId
                 vc.navigationController?.isNavigationBarHidden = false
                 vc.navigationItem.hidesBackButton = false
-                if self.sender != "feed" {
-                    vc.sender = "bandPage"
-                } else {
+                if self.sender == "feed" {
                     vc.sender = "feed"
+                } else if self.sender == "bandBoard"{
+                    vc.sender = "bandBoard"
+                }else {
+                    vc.sender = "bandPage"
                 }
                 
             }
@@ -147,6 +166,7 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
     func getSessID()->String{
         return sessionID!
     }
+    @IBOutlet weak var backButton: UIButton!
     
     @IBAction func ourSessionsPressed(_ sender: Any) {
     }
@@ -167,7 +187,18 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
     override func viewDidLoad(){
         
         super.viewDidLoad()
-        
+        if self.sender == "feed"{
+            
+            self.editSessionInfoButton.isHidden = true
+            self.backButton.isHidden = false
+        }
+        else if self.sender == "bandBoard"{
+            self.editSessionInfoButton.isHidden = true
+            self.backButton.isHidden = false
+        } else {
+            self.editSessionInfoButton.isHidden = false
+            self.backButton.isHidden = false
+        }
         self.tabBar.delegate = self
         
         navigationController?.isNavigationBarHidden = false
@@ -185,17 +216,8 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
         DispatchQueue.main.async{
             self.allSessionsCollect.isHidden = false
         }
-        /*editSessionButton.setTitle("Add and Remove Media", for: .normal)
-        editSessionButton.titleLabel?.numberOfLines = 3
-        editSessionButton.setTitleColor(UIColor.darkGray, for: .normal)
-        editSessionButton.titleLabel?.font = UIFont.systemFont(ofSize: 18.0, weight: UIFontWeightLight)
-        editSessionButton.titleLabel?.textAlignment = NSTextAlignment.center*/
         
-        //AddMusiciansButton.setTitle("Find Musicians", for: .normal)
-        //AddMusiciansButton.titleLabel?.numberOfLines = 2
-        //AddMusiciansButton.setTitleColor(UIColor.darkGray, for: .normal)
-       // AddMusiciansButton.titleLabel?.font = UIFont.systemFont(ofSize: 23.0, weight: UIFontWeightLight)
-        if self.sender != "feed" || self.sender == "bandBoard" || self.sender == "pfm"{
+        if self.sender != "feed" && self.sender != "pfm" && self.sender != "bandBoard"{
             self.becomeFanButton.isHidden = true
             AddMusiciansButton.titleLabel?.textAlignment = NSTextAlignment.center
             editSessionInfoButton.isHidden = false
@@ -219,26 +241,20 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
             addNewSession.isHidden = true
             self.becomeFanButton.isHidden = false
         }
-        
-        
-
-        
-        
-        
         ref.child("users").child(userID!).child("artistsBands").observeSingleEvent(of: .value, with: { (snapshot) in
             if let snapshots = snapshot.children.allObjects as? [DataSnapshot]{
                 for snap in snapshots{
                     self.sessionIDArray.append((snap.value! as! String))
                 }
             }
-        print(self.getSessID())
+        
         self.ref.child("bands").observeSingleEvent(of: .value, with: {(snapshot) in
             if let snapshots = snapshot.children.allObjects as? [DataSnapshot]{
                     for snap in snapshots{
                         if (snap.key == self.getSessID()){
                             
                             let dictionary = snap.value as? [String: AnyObject]
-                            print(dictionary)
+                            
                             let tempBand = Band()
                             tempBand.setValuesForKeys(dictionary!)
                             self.thisBand = tempBand
@@ -259,20 +275,7 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                             break
                         }
                 }
-                   /* for _ in self.vidArray{
-                        
-                        let cellNib = UINib(nibName: "VideoCollectionViewCell", bundle: nil)
-                        self.sessionVidCollectionView.register(cellNib, forCellWithReuseIdentifier: "VideoCollectionViewCell")
-                        
-                        self.sizingCell2 = ((cellNib.instantiate(withOwner: nil, options: nil) as NSArray).firstObject as! VideoCollectionViewCell?)!
-                        self.sessionVidCollectionView.backgroundColor = UIColor.clear
-                        self.sessionVidCollectionView.delegate = self
-                        self.sessionVidCollectionView.dataSource = self
-                        self.sessionChat.thisSessionID = self.getSessID()
-                        //self.view.setNeedsDisplay()
-                        
-                    }*/
-
+                
 
             }
             DispatchQueue.main.async{
@@ -381,8 +384,7 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                                         dateFormatter.dateStyle = DateFormatter.Style.short
                                         let now = Date()
                                         let order = Calendar.current.compare(now, to: self.dateFormatted(dateString: dictionary?["sessionDate"] as! String), toGranularity: .day)
-                                        //print(now)
-                                        //print(self.dateFormatted(dateString: dictionary?["sessionDate"] as! String))
+                                        
                                         let tempSess2 = Session()
                                         tempSess2.setValuesForKeys(dictionary!)
                                         
@@ -414,11 +416,11 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                         DispatchQueue.main.async {
                             if self.activeSessionsArray.count == 0{
                                 self.currentButton = "active"
-                                //self.curActiveArrayIndex = self.activeSessionsArray.index(of: session)!
+                                
                                 let cellNib = UINib(nibName: "SessionCell", bundle: nil)
                                 self.currentSessionsCollect.register(cellNib, forCellWithReuseIdentifier: "SessionCell")
                                 self.sizingCell = (cellNib.instantiate(withOwner: nil, options: nil) as NSArray).firstObject as! SessionCell?
-                                //self.currentSessionsCollect.backgroundColor = UIColor.clear
+                                
                                 self.currentSessionsCollect.dataSource = self
                                 self.currentSessionsCollect.delegate = self
                                 
@@ -430,7 +432,7 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                                 let cellNib = UINib(nibName: "SessionCell", bundle: nil)
                                 self.currentSessionsCollect.register(cellNib, forCellWithReuseIdentifier: "SessionCell")
                                 self.sizingCell = (cellNib.instantiate(withOwner: nil, options: nil) as NSArray).firstObject as! SessionCell?
-                                //self.currentSessionsCollect.backgroundColor = UIColor.clear
+                                
                                 self.currentSessionsCollect.dataSource = self
                                 self.currentSessionsCollect.delegate = self
                             }
@@ -439,12 +441,12 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                             DispatchQueue.main.async {
                                 if self.pastSessionArray.count == 0{
                                     self.currentButton = "past"
-                                    //self.curPastArrayIndex = self.pastSessionArray.index(of: session)!
+                                    
                                     
                                     let cellNib = UINib(nibName: "SessionCell", bundle: nil)
                                     self.pastSessionsCollect.register(cellNib, forCellWithReuseIdentifier: "SessionCell")
                                     self.sizingCell = (cellNib.instantiate(withOwner: nil, options: nil) as NSArray).firstObject as! SessionCell?
-                                    //self.pastSessionsCollect.backgroundColor = UIColor.clear
+                                    
                                     self.pastSessionsCollect.dataSource = self
                                     self.pastSessionsCollect.delegate = self
                                     
@@ -458,7 +460,7 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                                     let cellNib = UINib(nibName: "SessionCell", bundle: nil)
                                     self.pastSessionsCollect.register(cellNib, forCellWithReuseIdentifier: "SessionCell")
                                     self.sizingCell = (cellNib.instantiate(withOwner: nil, options: nil) as NSArray).firstObject as! SessionCell?
-                                    //self.pastSessionsCollect.backgroundColor = UIColor.clear
+                                    
                                     self.pastSessionsCollect.dataSource = self
                                     self.pastSessionsCollect.delegate = self
                                 }
@@ -468,11 +470,11 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                                 DispatchQueue.main.async {
                                     if self.upcomingSessionArray.count == 0{
                                         self.currentButton = "upcoming"
-                                        //self.curUpcomingArrayIndex = self.upcomingSessionArray.index(of: session)!
+                                        
                                         let cellNib = UINib(nibName: "SessionCell", bundle: nil)
                                         self.upcomingSessionsCollect.register(cellNib, forCellWithReuseIdentifier: "SessionCell")
                                         self.sizingCell = (cellNib.instantiate(withOwner: nil, options: nil) as NSArray).firstObject as! SessionCell?
-                                        // self.upcomingSessionsCollect.backgroundColor = UIColor.clear
+                                        
                                         self.upcomingSessionsCollect.dataSource = self
                                         self.upcomingSessionsCollect.delegate = self
                                     }
@@ -484,7 +486,7 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                                         let cellNib = UINib(nibName: "SessionCell", bundle: nil)
                                         self.upcomingSessionsCollect.register(cellNib, forCellWithReuseIdentifier: "SessionCell")
                                         self.sizingCell = (cellNib.instantiate(withOwner: nil, options: nil) as NSArray).firstObject as! SessionCell?
-                                       // self.upcomingSessionsCollect.backgroundColor = UIColor.clear
+                                       
                                         self.upcomingSessionsCollect.dataSource = self
                                         self.upcomingSessionsCollect.delegate = self
                                     }
@@ -492,11 +494,11 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                                     DispatchQueue.main.async{
                                         if self.allSessions.count == 0{
                                             self.currentButton = "all"
-                                            //self.curActiveArrayIndex = self.activeSessionsArray.index(of: session)!
+                                           
                                             let cellNib = UINib(nibName: "SessionCell", bundle: nil)
                                             self.allSessionsCollect.register(cellNib, forCellWithReuseIdentifier: "SessionCell")
                                             self.sizingCell = (cellNib.instantiate(withOwner: nil, options: nil) as NSArray).firstObject as! SessionCell?
-                                            // self.allSessionsCollect.backgroundColor = UIColor.clear
+                                          
                                             self.allSessionsCollect.dataSource = self
                                             self.allSessionsCollect.delegate = self
                                             
@@ -506,12 +508,12 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
                                                                             
                                         for _ in self.allSessions{
                                             self.currentButton = "all"
-                                            //self.curAllArrayIndex = self.allSessions.index(of: session)!
+                                          
                                             
                                             let cellNib = UINib(nibName: "SessionCell", bundle: nil)
                                             self.allSessionsCollect.register(cellNib, forCellWithReuseIdentifier: "SessionCell")
                                             self.sizingCell = (cellNib.instantiate(withOwner: nil, options: nil) as NSArray).firstObject as! SessionCell?
-                                         //   self.allSessionsCollect.backgroundColor = UIColor.clear
+                                        
                                             self.allSessionsCollect.dataSource = self
                                             self.allSessionsCollect.delegate = self
                                         }
@@ -591,6 +593,9 @@ class SessionMakerViewController: UIViewController, UINavigationControllerDelega
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath){
         //(tableView.cellForRow(at: indexPath) as ArtistCell).artistUID
+        if self.sender == "feed"{
+                self.sender = "bandToFeed"
+        }
         self.cellTouchedArtistUID = (tableView.cellForRow(at: indexPath) as! ArtistCell).artistUID
         performSegue(withIdentifier: "BandToArtistProfile", sender: self)
     }

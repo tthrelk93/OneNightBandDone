@@ -668,7 +668,7 @@ class AddMediaToSession: UIViewController, UITextViewDelegate, UINavigationContr
                 picker.delegate = self
                 curCount = 0
                 
-                ref.child("sessions").child(sessionID!).child("sessionMedia").observeSingleEvent(of: .value, with: { (snapshot) in
+                ref.child("bands").child(sessionID!).child("bandMedia").observeSingleEvent(of: .value, with: { (snapshot) in
                     if self.youtubeLinkArray.count == 0{
                         if let snapshots = snapshot.children.allObjects as? [DataSnapshot]{
                             

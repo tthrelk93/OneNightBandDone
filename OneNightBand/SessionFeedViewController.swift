@@ -400,10 +400,17 @@ class SessionFeedViewController: UIViewController, UIGestureRecognizerDelegate,U
                 vc.feedDismissalDelegate = self
             }
         }
-        if segue.identifier == "FeedToArtistProf"{
-            if let vc = segue.destination as? ArtistProfileViewController{
+        if segue.identifier == "FeedToProfile"{
+            if let vc = segue.destination as? profileRedesignViewController{
                 //print(self.cellTouchedArtistUID)
-                vc.artistUID = self.cellTouchedArtistUID
+                if self.tabBarPressed == true{
+                    vc.fromTabBar = true
+                } else {
+                    vc.fromTabBar = false
+                }
+                vc.sender = "feed"
+                vc.artistID = cellTouchedArtistUID
+                vc.userID = cellTouchedArtistUID
             }
         }
         if segue.identifier == "SessionFeedToBandPage"{
@@ -465,7 +472,7 @@ class SessionFeedViewController: UIViewController, UIGestureRecognizerDelegate,U
         //(tableView.cellForRow(at: indexPath) as ArtistCell).artistUID
         self.cellTouchedArtistUID = (tableView.cellForRow(at: indexPath) as! ArtistCell).artistUID
         print(self.cellTouchedArtistUID)
-        performSegue(withIdentifier: "FeedToArtistProf", sender: self)
+        performSegue(withIdentifier: "FeedToProfile", sender: self)
     }
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
         let cell = tableView.dequeueReusableCell(withIdentifier: "ArtistCell", for: indexPath as IndexPath) as! ArtistCell
@@ -689,6 +696,7 @@ class SessionFeedViewController: UIViewController, UIGestureRecognizerDelegate,U
     
     @available(iOS 2.0, *)
     public func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem){
+        self.tabBarPressed = true
         if item == tabBar.items?[0]{
             performSegue(withIdentifier: "FeedToFindMusicians", sender: self)
         } else if item == tabBar.items?[1]{
@@ -702,7 +710,7 @@ class SessionFeedViewController: UIViewController, UIGestureRecognizerDelegate,U
     }
 
     
-    
+    var tabBarPressed = Bool()
     @IBOutlet weak var displayLine: UIView!
     
     func currentButtonFunc()->ONBGuitarButton{

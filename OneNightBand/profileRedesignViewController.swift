@@ -214,20 +214,29 @@ class profileRedesignViewController: UIViewController, UITabBarDelegate, UIColle
     var videoCount = 0
     var instrumentCount = 0
     var artistID = String()
-    
+    var fromTabBar: Bool?
     override func viewDidLoad() {
         super.viewDidLoad()
         //SwiftOverlays.showBlockingTextOverlay("Loading Profile")
         if self.sender == "wantedAdCreated"{
             self.createWantedSuccess.isHidden = false
         }
-        if self.sender == "onb" || self.sender == "band"{
+        if self.sender == "onb" || self.sender == "band" || self.sender == "feed" || self.sender == "bandBoard" || self.sender == "bandToFeed"{
             self.tabBar.isHidden = true
             self.backButton.isHidden = false
-            self.userID = self.artistID
+            if self.sender == "feed" && self.fromTabBar == true{
+                self.userID = (Auth.auth().currentUser?.uid)!
+                self.tabBar.isHidden = false
+                self.backButton.isHidden = true
+            
+            } else {
+                self.userID = self.artistID
+                
+            }
             self.addMedia.isEnabled = false
             self.invitesMessagesButton.isEnabled = false
             self.updateInfoButton.isEnabled = false
+            
         } else {
             self.tabBar.isHidden = false
             self.backButton.isHidden = true
@@ -522,20 +531,25 @@ class profileRedesignViewController: UIViewController, UITabBarDelegate, UIColle
         }
         if segue.identifier == "ProfileToSessionMaker" {
             if let viewController = segue.destination as? SessionMakerViewController {
-                if self.sender == "band"{
+                if self.sender == "bandToFeed"{
+                    self.sender = "feed"
+                    
+                }
+                if self.sender == "band" || self.sender == "bandBoard"{
                     viewController.sessionID = self.senderID
-                } else {
+                } /*else if self.sender == "feed"{
+                    viewController.
+                }*/ else {
                     viewController.sessionID = self.bandIDArray[tempIndex]
                 }
-                //print("bandID = \(self.bandIDArray[tempIndex])")
-                //
-                print("tempIndex= \(self.tempIndex)")
-                viewController.sender = "myBands"
+                
+                viewController.sender = self.sender
                 
             }
         }
         if segue.identifier == "ProfileToONB"{
             if let viewController = segue.destination as? OneNightBandViewController {
+                viewController.sender = "profile"
                 if self.sender == "onb"{
                     viewController.onbID = self.senderID
                 } else {
@@ -793,6 +807,7 @@ class profileRedesignViewController: UIViewController, UITabBarDelegate, UIColle
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath){
         //(tableView.cellForRow(at: indexPath) as ArtistCell).artistUID
+        
         //self.cellTouchedArtistUID = (tableView.cellForRow(at: indexPath) as! ArtistCell).artistUID
         //performSegue(withIdentifier: "ArtistCellTouched", sender: self)
     }
@@ -812,6 +827,8 @@ class profileRedesignViewController: UIViewController, UITabBarDelegate, UIColle
     @IBAction func backButtonPressed(_ sender: Any) {
         if self.sender == "onb"{
             self.performSegue(withIdentifier: "ProfileToONB", sender: self)
+        } else if self.sender == "feed"{
+            performSegue(withIdentifier: "redesignProfileToFeed", sender: self)
         } else {
             self.performSegue(withIdentifier: "ProfileToSessionMaker", sender: self)
         }
